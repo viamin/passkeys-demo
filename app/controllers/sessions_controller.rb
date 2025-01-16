@@ -62,10 +62,9 @@ class SessionsController < ApplicationController
   end
 
   def verify
-    binding.irb
     credential = WebAuthn::Credential.from_get(params)
     @user = User.find(session.dig("passkey_authentication", "user_id"))
-    passkey = @user.passkeys.find_by(external_id: Base64.strict_encode64(credential.raw_id))
+    passkey = @user.passkeys.find_by(external_id: credential.id)
 
     begin
       credential.verify(

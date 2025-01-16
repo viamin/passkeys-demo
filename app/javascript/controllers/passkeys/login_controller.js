@@ -31,12 +31,12 @@ export default class extends Controller {
     try {
       const credential = await WebAuthnJSON.get({ "publicKey": data })
       const request = new FetchRequest("post", this.callbackValue, {
-        body: JSON.stringify(credential)
+        body: JSON.stringify(credential),
+        follow: "follow"
       })
       const response = await request.perform()
       if (response.ok) {
-        const data = await response.json
-        window.Turbo.visit(data.redirect, { action: 'replace' })
+        window.location.href = "/users/settings"
       }
     } catch (error) {
       console.log("There was a problem with the authentication request", error)
