@@ -1,49 +1,55 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <% if alert = flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" id="alert"><%= alert %></p>
-  <% end %>
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-end mb-8">
+    <%= button_to "Logout", session_path, method: :delete, class: "rounded-md px-3.5 py-2.5 bg-gray-600 hover:bg-gray-500 text-white inline-block font-medium cursor-pointer" %>
+  </div>
 
-  <h1 class="font-bold text-4xl">User settings</h1>
+  <div class="max-w-3xl mx-auto">
+    <% if alert = flash[:alert] %>
+      <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" id="alert"><%= alert %></p>
+    <% end %>
 
-  <p class="my-5"><%= @user.email_address %></p>
+    <h1 class="font-bold text-4xl mb-8">User settings</h1>
 
-  <h2 class="font-bold text-2xl my-5">Passkeys</h2>
+    <p class="my-5"><%= @user.email_address %></p>
 
-  <ul class="list-disc list-inside">
-    <% if @user.passkeys.any? %>
-      <% @user.passkeys.each do |passkey| %>
-        <li class="my-5"><%= passkey.nickname %></li>
+    <h2 class="font-bold text-2xl my-5">Passkeys</h2>
+
+    <ul class="list-disc list-inside">
+      <% if @user.passkeys.any? %>
+        <% @user.passkeys.each do |passkey| %>
+          <li class="my-5"><strong><%= passkey.nickname %></strong> - <%= passkey.authenticator_attachment %></li>
+        <% end %>
+      <% else %>
+        <li>None</li>
       <% end %>
-    <% else %>
-      <li>None</li>
-    <% end %>
-  </ul>
+    </ul>
 
-  <div class="mt-10">
-    <%= form_with scope: :passkey,
-                  url: challenge_passkeys_path(format: :json),
-                  method: :post,
-                  data: {
-                    controller: "passkeys--register",
-                    "passkeys--register-callback-value": passkeys_path,
-                    "passkeys--register-target": "form"
-                  } do |form| %>
-      <div class="space-y-4">
-        <div>
-          <%= form.text_field :nickname,
-            class: "w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
-            placeholder: "New Passkey nickname",
-            required: true,
-            data: { "passkeys--register-target": "nickname" } %>
-        </div>
+    <div class="mt-10">
+      <%= form_with scope: :passkey,
+                    url: challenge_passkeys_path(format: :json),
+                    method: :post,
+                    data: {
+                      controller: "passkeys--register",
+                      "passkeys--register-callback-value": passkeys_path,
+                      "passkeys--register-target": "form"
+                    } do |form| %>
+        <div class="space-y-4">
+          <div>
+            <%= form.text_field :nickname,
+              class: "w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
+              placeholder: "New Passkey nickname",
+              required: true,
+              data: { "passkeys--register-target": "nickname" } %>
+          </div>
 
-        <div class="flex justify-center">
-          <button type="submit"
-            class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Add Passkey
-          </button>
+          <div class="flex justify-center">
+            <button type="submit"
+              class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              Add Passkey
+            </button>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 </div>

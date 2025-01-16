@@ -34,7 +34,8 @@ class PasskeysController < ApplicationController
       external_id: passkey_credential.id,
       public_key: passkey_credential.public_key,
       nickname: passkey_params[:nickname],
-      sign_count: passkey_credential.sign_count
+      sign_count: passkey_credential.sign_count,
+      authenticator_attachment: passkey_params[:authenticatorAttachment]
     )
 
     if passkey.save
