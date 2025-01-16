@@ -1,24 +1,13 @@
-# README
+# Passkey Authentication In Ruby on Rails demo app
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A demo app for a talk given at SF Ruby Meetup, Jan 16, 2025.
 
-Things you may want to cover:
+[Slides](https://docs.google.com/presentation/d/1cWArcQ7o2RD6OjugWjVepo9tS1skAo1eYvboHjIBIqI/edit?usp=sharing)
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Articles and Links from the talk:
+- [W3C WebAuthn standard](https://www.w3.org/TR/webauthn/)
+- [DHH Passkeys post](https://world.hey.com/dhh/passwords-have-problems-but-passkeys-have-more-95285df9)
+- [Ars Technica article](https://arstechnica.com/security/2024/12/passkey-technology-is-elegant-but-its-most-definitely-not-usable-security/)
+- [William Brown's post](https://fy.blackhats.net.au/blog/2024-04-26-passkeys-a-shattered-dream/)
+- [Corbado Passkey article](https://www.corbado.com/blog/passkey-implementation-pitfalls-misconceptions-unknowns)
+- [webauthn-ruby gem](https://github.com/cedarcode/webauthn-ruby)
