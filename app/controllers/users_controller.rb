@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
   def settings
-    @user = Current.session.user
+    @user = current_user
   end
 end
