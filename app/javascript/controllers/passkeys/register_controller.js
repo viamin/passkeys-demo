@@ -1,44 +1,47 @@
 import { Controller } from "@hotwired/stimulus"
 
 import * as WebAuthnJSON from "@github/webauthn-json"
+import { FetchRequest } from "@rails/request.js"
 
 // Connects to data-controller="passkeys--register"
 export default class extends Controller {
-  static targets = ["nickname"]
+  static targets = ["nickname", "form"]
   static values = { callback: String }
 
-  create(event) {
-    const [data, status, xhr] = event.detail;
-    const passkey_nickname = event.target.querySelector("input[name='passkey[nickname]']").value;
-    const callback_url = `/passkeys/callback?passkey_nickname=${passkey_nickname}`
+  connect() {
+    this.formTarget.addEventListener("submit", this.handleSubmit.bind(this))
+  }
 
-    WebAuthnJSON.create({ "publicKey": data }).then(function (passkey) {
-      fetch(encodeURI(callback_url), {
-        method: "POST",
-        body: JSON.stringify(passkey),
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-        },
-        credentials: 'same-origin'
-      }).then(function (response) {
-        if (response.ok) {
-          window.location.replace("/")
-        } else if (response.status < 500) {
-          response.text();
-        } else {
-          showMessage("Sorry, something wrong happened.");
-        }
-      });
-    }).catch(function (error) {
-      showMessage(error);
-    });
+  async handleSubmit(event) {
+    event.preventDefault()
 
-    console.log("Creating new public key credential...");
-
-    WebAuthnJSON.create({ "publicKey": data }).then(async function (credential) {
-      const request = fetch(_this.callbackValue)
+    const request = new FetchRequest("post", this.formTarget.action, {
+      responseKind: "json"
     })
+
+    const response = await request.perform()
+    if (response.ok) {
+      const data = await response.json
+      this.initiateWebAuthn(data)
+    }
+  }
+
+  async initiateWebAuthn(data) {
+    try {
+      const credential = await WebAuthnJSON.create({ "publicKey": data })
+      const request = new FetchRequest("post", this.callbackValue + `?nickname=${this.nicknameTarget.value}`, {
+        body: JSON.stringify(credential)
+      })
+      const response = await request.perform()
+      if (response.ok) {
+        window.location.href = "/users/settings"
+      }
+    } catch (error) {
+      console.log("There was a problem with the authentication request", error)
+    }
+  }
+
+  error(event) {
+    console.log("There was a problem with the authentication request", event)
   }
 }

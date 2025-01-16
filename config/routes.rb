@@ -3,8 +3,11 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
 
-  resource :passkeys, only: %i[ create destroy ] do
-    post :callback, on: :collection
+  resources :passkeys, only: %i[ create destroy ] do
+    post :challenge, on: :collection
+    # collection do
+    #   resource :challenge, only: %i[create], module: :passkeys, as: :passkeys_challenge
+    # end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -15,7 +15,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_15_231404) do
     t.integer "user_id", null: false
     t.string "nickname"
     t.string "public_key"
-    t.integer "sign_count"
+    t.integer "sign_count", default: 0, null: false
+    t.string "external_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_passkeys_on_user_id"

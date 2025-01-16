@@ -12,24 +12,37 @@
   <ul class="list-disc list-inside">
     <% if @user.passkeys.any? %>
       <% @user.passkeys.each do |passkey| %>
-        <li class="my-5"><%= passkey.label %></li>
+        <li class="my-5"><%= passkey.nickname %></li>
       <% end %>
     <% else %>
       <li>None</li>
     <% end %>
   </ul>
 
-  <div class="new_passkey mt-10" data-controller="passkeys--register">
-    <%= form_with scope: :passkey, url: passkeys_path, local: false, data: { action: "ajax:success->add-passkey#create" } do |form| %>
-      <div class="form-field">
-        <div class="text-field">
-          <%= form.text_field :nickname, class: "fext-field__input", placeholder: "New Passkey nickname", required: true %>
-          <div class="line-ripple"></div>
+  <div class="mt-10">
+    <%= form_with scope: :passkey,
+                  url: challenge_passkeys_path(format: :json),
+                  method: :post,
+                  data: {
+                    controller: "passkeys--register",
+                    "passkeys--register-callback-value": passkeys_path,
+                    "passkeys--register-target": "form"
+                  } do |form| %>
+      <div class="space-y-4">
+        <div>
+          <%= form.text_field :nickname,
+            class: "w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
+            placeholder: "New Passkey nickname",
+            required: true,
+            data: { "passkeys--register-target": "nickname" } %>
         </div>
-      </div>
 
-      <div class="center">
-        <%= form.submit "Add Passkey", class: "button" %>
+        <div class="flex justify-center">
+          <button type="submit"
+            class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Add Passkey
+          </button>
+        </div>
       </div>
     <% end %>
   </div>

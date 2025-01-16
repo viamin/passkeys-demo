@@ -1,52 +1,67 @@
+# frozen_string_literal: true
+
 class PasskeysController < ApplicationController
-  def create
+  def challenge
+    # Generate WebAuthn ID if the user does not have any yet
+    current_user.update(passkey_id: WebAuthn.generate_user_id) unless current_user.passkey_id
+
+    # Prepare the data needed for a challenge
     create_options = WebAuthn::Credential.options_for_create(
       user: {
         id: current_user.passkey_id,
         name: current_user.email_address
       },
-      exclude: current_user.passkeys.pluck(:external_id),
-      authenticator_selection: { user_verification: "required" }
+      exclude: current_user.passkeys.pluck(:external_id)
     )
 
-    session[:current_registration] = { challenge: create_options.challenge }
+    # Generate the challenge and save it into the session
+    session[:passkey_register_challenge] = create_options.challenge
 
     respond_to do |format|
-      format.js { render json: create_options }
+      format.json { render json: create_options }
     end
   end
 
-  def callback
-    webauthn_credential = WebAuthn::Credential.from_create(params)
+  def create
+    # Create WebAuthn Credentials from the request params
+    passkey_credential = WebAuthn::Credential.from_create(passkey_params)
 
     begin
-      webauthn_credential.verify(session[:current_registration]["challenge"], user_verification: true)
+      # Validate the challenge
+      passkey_credential.verify(session[:passkey_register_challenge])
 
-      passkey = current_user.passkeys.find_or_initialize_by(
-        external_id: Base64.strict_encode64(webauthn_credential.raw_id)
+      # The validation would raise WebAuthn::Error so if we are here, the credentials are valid, and we can save it
+      passkey = current_user.passkeys.new(
+        external_id: passkey_credential.id,
+        public_key: passkey_credential.public_key,
+        nickname: passkey_params[:nickname],
+        sign_count: passkey_credential.sign_count
       )
 
-      if passkey.update(
-        nickname: params[:credential_nickname],
-        public_key: webauthn_credential.public_key,
-        sign_count: webauthn_credential.sign_count
-        )
-        render json: { status: "ok" }, status: :ok
+      if passkey.save
+        redirect_to users_settings_path, notice: "Passkey added"
       else
-        render json: "Couldn't add your Passkey", status: :unprocessable_entity
+        logger.debug "\n\n******* Failed to save the passkey:\n#{passkey.errors.full_messages.join(', ')}\n\n"
+        render turbo_stream: turbo_stream.update("passkey_error", "<p class=\"text-red-500\">Couldn't add your Security Key</p>")
       end
     rescue WebAuthn::Error => e
-      render json: "Verification failed: #{e.message}", status: :unprocessable_entity
+      render turbo_stream: turbo_stream.update("passkey_error", "<p class=\"text-red-500\">Verification failed: #{e.message}</p>")
     ensure
-      session.delete(:current_registration)
+      session.delete(:passkey_register_challenge)
     end
   end
 
   def destroy
-    if current_user&.can_delete_credentials?
-      current_user.passkeys.destroy(params[:id])
-    end
+    passkey = current_user.passkeys.find(params[:id])
+    passkey.destroy
 
-    redirect_to users_settings_path
+    render turbo_stream: turbo_stream.remove(passkey)
+  end
+
+  private
+
+  def passkey_params
+    params.permit(:type, :id, :rawId, :clientExtensionResults, :authenticatorAttachment, :nickname,
+      response: [ :attestationObject, :clientDataJSON, { transports: [] } ])
   end
 end
