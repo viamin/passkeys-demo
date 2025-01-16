@@ -6,11 +6,22 @@ class SessionsController < ApplicationController
   end
 
   def create
-    if user = User.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
-      redirect_to after_authentication_url
+    if params[:password].present?
+      if user = User.authenticate_by(params.permit(:email_address, :password))
+        start_new_session_for user
+        redirect_to after_authentication_url
+      else
+        redirect_to new_session_path, alert: "Try another email address or password."
+      end
     else
-      redirect_to new_session_path, alert: "Try another email address or password."
+      @user = User.find_by(email_address: params[:email_address])
+      if @user&.passkeys&.any?
+        @passkey_login = true
+        render :new
+      else
+        @password_login = true
+        render :new
+      end
     end
   end
 
