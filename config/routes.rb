@@ -5,9 +5,6 @@ Rails.application.routes.draw do
 
   resources :passkeys, only: %i[ create destroy ] do
     post :challenge, on: :collection
-    # collection do
-    #   resource :challenge, only: %i[create], module: :passkeys, as: :passkeys_challenge
-    # end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
