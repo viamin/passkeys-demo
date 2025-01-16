@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   get "users/settings"
-  resource :session
+  resource :session do
+    post :challenge, on: :collection
+    post :verify, on: :collection
+  end
+
   resources :passwords, param: :token
 
   resources :passkeys, only: %i[ create destroy ] do
