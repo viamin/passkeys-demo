@@ -5,5 +5,32 @@
 
   <h1 class="font-bold text-4xl">User settings</h1>
 
-  <p><%= @user.email_address %></p>
+  <p class="my-5"><%= @user.email_address %></p>
+
+  <h2 class="font-bold text-2xl my-5">Passkeys</h2>
+
+  <ul class="list-disc list-inside">
+    <% if @user.passkeys.any? %>
+      <% @user.passkeys.each do |passkey| %>
+        <li class="my-5"><%= passkey.label %></li>
+      <% end %>
+    <% else %>
+      <li>None</li>
+    <% end %>
+  </ul>
+
+  <div class="new_passkey mt-10" data-controller="passkeys--register">
+    <%= form_with scope: :passkey, url: passkeys_path, local: false, data: { action: "ajax:success->add-passkey#create" } do |form| %>
+      <div class="form-field">
+        <div class="text-field">
+          <%= form.text_field :nickname, class: "fext-field__input", placeholder: "New Passkey nickname", required: true %>
+          <div class="line-ripple"></div>
+        </div>
+      </div>
+
+      <div class="center">
+        <%= form.submit "Add Passkey", class: "button" %>
+      </div>
+    <% end %>
+  </div>
 </div>
