@@ -40,7 +40,10 @@ class SessionsController < ApplicationController
 
     if @user
       # prepare WebAuthn options
-      get_options = WebAuthn::Credential.options_for_get(allow: @user.passkeys.pluck(:external_id))
+      get_options = WebAuthn::Credential.options_for_get(
+        allow: @user.passkeys.pluck(:external_id),
+        user_verification: "preferred"
+      )
 
       # prepare session for passwordless
       session[:passkey_authentication] ||= {}
@@ -70,8 +73,7 @@ class SessionsController < ApplicationController
       credential.verify(
         session.dig("passkey_authentication", "challenge"),
         public_key: passkey.public_key,
-        sign_count: passkey.sign_count,
-        user_verification: true
+        sign_count: passkey.sign_count
       )
       passkey.update!(sign_count: credential.sign_count)
       start_new_session_for @user

@@ -31,8 +31,7 @@ export default class extends Controller {
     try {
       const credential = await WebAuthnJSON.get({ "publicKey": data })
       const request = new FetchRequest("post", this.callbackValue, {
-        body: JSON.stringify(credential),
-        follow: "follow"
+        body: JSON.stringify(credential)
       })
       const response = await request.perform()
       if (response.ok) {
