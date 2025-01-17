@@ -13,16 +13,6 @@ class SessionsController < ApplicationController
       else
         redirect_to new_session_path, alert: "Try another email address or password."
       end
-    elsif params[:response].present?
-      @user = User.find(session.dig("passkey_authentication", "user_id"))
-      get_options = WebAuthn::Credential.options_for_get(
-        allow: @user.passkeys.pluck(:external_id),
-        user_verification: "required"
-      )
-      session[:passkey_authentication] = {
-        challenge: get_options.challenge
-      }
-      render json: { challenge: get_options.challenge }
     else
       @user = User.find_by(email_address: params[:email_address])
       if @user&.passkeys&.any?
