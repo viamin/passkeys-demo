@@ -14,3 +14,9 @@ Articles and Links from the talk:
 - [Corbado Passkey article](https://www.corbado.com/blog/passkey-implementation-pitfalls-misconceptions-unknowns)
 - [webauthn-ruby gem](https://github.com/cedarcode/webauthn-ruby)
 - [webauthn-json package](https://github.com/github/webauthn-json)
+
+## Running the Demo
+
+- `bin/setup` will install the necessary dependencies and a database
+- `bin/rails db:seed` will create a sample user for you to test (username: `admin@example.com`, password: `password`)
+- `bin/dev` will start the server (if not already running after using `bin/setup`)
